@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.vite/
+.DS_Store
+*.local
+.env
+.env.*
+tmp/
+artifacts/
+test-results/
+*.log
+!btsnoop_hci.log.example
