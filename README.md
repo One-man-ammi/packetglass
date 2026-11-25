@@ -2,7 +2,10 @@
 
 *A workbench for reverse-engineering BLE devices - the view Wireshark never gave you.*
 
-> **Status: planning / v1 spec.** Built while reverse-engineering a cheap fitness band ([h59-ultra-reverse-engineering](https://github.com/One-man-ammi/h59-ultra-reverse-engineering)), because Wireshark showed raw bytes but nothing about the device behind them.
+> **Status: v0.1 runs.** Import a capture, pick a device, read the bytes. Event marks, annotations and
+> the AI layer are still spec, not code. Built while reverse-engineering a cheap fitness band
+> ([h59-ultra-reverse-engineering](https://github.com/One-man-ammi/h59-ultra-reverse-engineering)),
+> because Wireshark showed raw bytes but nothing about the device behind them.
 
 ---
 
@@ -65,9 +68,33 @@ replacement for it.
 - btsnoop parsing per the [btstack btsnoop documentation](https://github.com/bluekitchen/btstack/blob/master/doc/md/btstack.md) (format is a documented classic)
 - No backend, no account, no cloud
 
+## Run it
+
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm test           # parser and formatter unit tests
+```
+
+No capture to hand? The import screen has an **Open sample capture** button that builds a small
+synthetic one in memory, with the same byte-level builders the tests use
+([src/parser/synthetic.ts](src/parser/synthetic.ts)).
+
+## What v0.1 actually does
+
+- Reads the btsnoop file header and records by hand, big-endian, per the documented format, and
+  converts the 0000-01-01 microsecond timestamps to wall clock
+  ([src/parser/btsnoop.ts](src/parser/btsnoop.ts))
+- Splits the H4 packet type, reassembles ACL fragments into L2CAP packets per connection and
+  direction, and follows the connection-complete and disconnection events so every packet knows
+  which remote address it belongs to ([src/parser/hci.ts](src/parser/hci.ts))
+- Keeps ATT writes, write commands, signed writes, notifications and indications; names the rest
+  but leaves it out of the table ([src/parser/att.ts](src/parser/att.ts))
+- Parses in a web worker, so a large capture does not freeze the tab. Nothing leaves the browser
+
 ## Roadmap
 
-- [ ] v0.1 - btsnoop import, device filter, hex/ASCII/numbers view
+- [x] v0.1 - btsnoop import, device filter, hex/ASCII/numbers view
 - [ ] v0.2 - event marks + diff-by-event highlighting
 - [ ] v0.3 - annotations, session save/load, Markdown export
 - [ ] v0.4 - live mode: follow a capture session in real time from a companion app
