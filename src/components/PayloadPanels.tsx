@@ -124,7 +124,8 @@ function NumberCell({ value, width }: { value: number | null; width: number }) {
   if (value === null) return <span className="number-empty">-</span>;
   return (
     <span className="number-cell">
-      <span className="number-dec">{value.toLocaleString('en-US')}</span>
+      {/* No thousands separators: a decoded field reads better as 2026 than 2,026. */}
+      <span className="number-dec">{value}</span>
       <span className="number-hex">{hexValue(value, width)}</span>
     </span>
   );
